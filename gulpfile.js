@@ -102,3 +102,7 @@ gulp.task('sass:watch', () => {
 
 gulp.task('default', gulp.series('sass', 'css', 'minify-desktop'));
 gulp.task('watch', gulp.series('sass', 'css', 'minify-desktop', 'sass:watch'));
+
+
+gulp.task('default', gulp.series('sass', 'css', 'minify-desktop'));
+gulp.task('watch', gulp.series('sass', 'css', 'minify-desktop', 'sass:watch'));
