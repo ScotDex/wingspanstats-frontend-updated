@@ -1,16 +1,17 @@
-// Old and probably working
 const path = require('path');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // Updated import for CleanWebpackPlugin
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { VueLoaderPlugin } = require('vue-loader'); // Updated import for VueLoaderPlugin
 const glob = require('glob');
 
 const oldexports = {
-  mode: process.env.NODE_ENV,
+  mode: process.env.NODE_ENV || 'development', // Default to development if not set
   entry: {
     app: './src/js/app.js',
   },
   output: {
     filename: 'js/[name].bundle.js',
-    path: path.resolve(__dirname, 'dest')
+    path: path.resolve(__dirname, 'dest'),
   },
   externals: {
     axios: 'axios',
@@ -18,38 +19,33 @@ const oldexports = {
     moment: 'moment',
     vue: 'Vue',
     vuex: 'Vuex',
-    'vue-router': 'VueRouter'
-  }
+    'vue-router': 'VueRouter',
+  },
 };
 
 // Updated and confirmed working
-// Imports
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
-// Constants
 const extractVueSCSS = new MiniCssExtractPlugin({
-  filename: 'css/vue.css'
+  filename: 'css/vue.css',
 });
 
 // Data
-newexports = {
+const newexports = {
   plugins: [
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         'dest/css/vue*',
         'dest/images',
         'dest/js',
-      ]
+      ],
     }),
-    new VueLoaderPlugin(),
-    extractVueSCSS
+    new VueLoaderPlugin(), // For Vue 3
+    extractVueSCSS,
   ],
   module: {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader'
+        loader: 'vue-loader',
       },
       {
         test: /\.(sass|scss)$/,
@@ -62,10 +58,10 @@ newexports = {
           {
             loader: 'sass-resources-loader',
             options: {
-              resources: path.resolve(__dirname, './src/sass/_inject.scss')
-            }
-          }
-        ]
+              resources: path.resolve(__dirname, './src/sass/_inject.scss'),
+            },
+          },
+        ],
       },
       {
         test: /\.(png|svg)$/,
@@ -74,10 +70,10 @@ newexports = {
             loader: 'file-loader',
             options: {
               name: '[name].[ext]?[hash]',
-              outputPath: '/images/'
-            }
-          }
-        ]
+              outputPath: '/images/',
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2)$/,
@@ -86,19 +82,27 @@ newexports = {
             loader: 'file-loader',
             options: {
               name: '[name].[ext]?[hash]',
-              outputPath: '/fonts/'
-            }
-          }
-        ]
-      }
-    ]
-  }
+              outputPath: '/fonts/',
+            },
+          },
+        ],
+      },
+    ],
+  },
+  resolve: {
+    alias: {
+      vue$: 'vue/dist/vue.esm-bundler.js', // Specific for Vue 3
+    },
+    extensions: ['.js', '.vue', '.json'],
+  },
 };
 
-result = {};
+// Merge old and new exports
+const result = {};
 Object.assign(result, oldexports);
 Object.assign(result, newexports);
 
 console.log(result);
 
 module.exports = result;
+
