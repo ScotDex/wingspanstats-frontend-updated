@@ -4,13 +4,10 @@ const gulp = require('gulp');
 const sourcemaps = require('gulp-sourcemaps');
 
 // Compile SASS
-const sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('sass'));
 
 // Import node please
 const moduleImporter = require('sass-module-importer');
-
-// Remove unneeded CSS
-const purgecss = require('gulp-purgecss');
 
 // Perform PostCSS magic
 const postcss = require('gulp-postcss');
@@ -34,17 +31,10 @@ gulp.task('sass', () => {
   return gulp.src('./src/sass/app.scss')
     .pipe(sourcemaps.init())
     .pipe(sass({ importer: moduleImporter() }).on('error', sass.logError))
-    .pipe(purgecss({
-      content: [
-        './src/**/*.js',
-        './src/**/*.vue',
-        './dest/index-view.html',
-        './dest/**/*.js',
-      ]
-    }))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./dest/css/'));
 });
+
 
 gulp.task('css', () => {
   return gulp.src([
@@ -103,6 +93,3 @@ gulp.task('sass:watch', () => {
 gulp.task('default', gulp.series('sass', 'css', 'minify-desktop'));
 gulp.task('watch', gulp.series('sass', 'css', 'minify-desktop', 'sass:watch'));
 
-
-gulp.task('default', gulp.series('sass', 'css', 'minify-desktop'));
-gulp.task('watch', gulp.series('sass', 'css', 'minify-desktop', 'sass:watch'));
