@@ -1,9 +1,15 @@
-// We can do this due to tree-shaking
-@import 'bootstrap/scss/bootstrap.scss';
+// Import Bootstrap SCSS for Bootstrap 5 (ensure it's installed via npm)
+@import 'node_modules/bootstrap/scss/bootstrap';
 
-// Some helpers
-@import 'bootstrap-3-glyphicons';
+// Custom helpers (ensure this file exists)
 @import 'helpers';
 
-// Tooltips!
+// Replace 'bootstrap-3-glyphicons' with an icon library, like Font Awesome (Bootstrap 5 removed glyphicons)
+// Import Font Awesome for modern icons
+@import 'node_modules/@fortawesome/fontawesome-free/scss/fontawesome';
+@import 'node_modules/@fortawesome/fontawesome-free/scss/solid';
+@import 'node_modules/@fortawesome/fontawesome-free/scss/regular';
+@import 'node_modules/@fortawesome/fontawesome-free/scss/brands';
+
+// Import custom tooltip styles
 @import 'a_simple_css_tooltip';
