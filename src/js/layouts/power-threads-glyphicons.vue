@@ -290,3 +290,5 @@
   .glyphicon-menu-down              { &:before { content: "\e259"; } }
   .glyphicon-menu-up                { &:before { content: "\e260"; } }
 </style>
+<template>
+</template>
