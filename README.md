@@ -19,4 +19,4 @@ Transfer `dest` folder contents to target server. In `dest` directory run:
 composer install
 ```
 
-Get the backend for statistics from [@secondfry/wingspanstats](https://github.com/secondfry/wingspanstats).
+Get the backend for statistics from (https://github.com/ScotDex/wingspanstats)
