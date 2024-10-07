@@ -1,8 +1,8 @@
 <script>
-  import { mapActions, mapGetters, mapState } from 'vuex'
+  import { mapActions, mapGetters, mapState } from 'vuex';
 
-  import PilotIconWithMedals from '../pilot-icon-with-medals.vue'
-  import LeaderboardTicker from '../leaderboard/leaderboard-ticker.vue'
+  import PilotIconWithMedals from '../pilot-icon-with-medals.vue';
+  import LeaderboardTicker from '../leaderboard/leaderboard-ticker.vue';
 
   export default {
     props: ['category', 'pilot', 'listLength'],
@@ -11,55 +11,50 @@
         'getPilotName',
         'hasUser',
       ]),
-      placeClass () {
+      placeClass() {
         switch (this.pilot.place) {
-          case 1: return 'place-gold';
-          case 2: return 'place-silver';
-          case 3: return 'place-bronze';
-          case 4: return 'place-wingspan';
-          default: return 'place-haxxor';
+          case 1:
+            return 'place-gold';
+          case 2:
+            return 'place-silver';
+          case 3:
+            return 'place-bronze';
+          case 4:
+            return 'place-wingspan';
+          default:
+            return 'place-haxxor';
         }
       },
-      size () {
-        switch (this.listLength) {
-          case 1: return 'large';
-          default: return 'small';
-        }
+      size() {
+        return this.listLength === 1 ? 'large' : 'small';
       },
-      sizeClass () {
-        switch (this.listLength) {
-          case 1: return 'place-large';
-          default: return 'place-small';
-        }
+      sizeClass() {
+        return this.listLength === 1 ? 'place-large' : 'place-small';
       },
-      change () {
+      change() {
         if (this.pilot.change === false || this.pilot.change === 0) {
           return '';
         }
-
         return this.pilot.change;
       },
-      glyphClass () {
+      glyphClass() {
         if (this.pilot.change > 0) {
           return 'glyphicon glyphicon-chevron-up text-success';
         }
-
         if (this.pilot.change < 0) {
           return 'glyphicon glyphicon-chevron-down text-danger';
         }
-
         if (this.pilot.change === 0) {
           return 'glyphicon glyphicon-pause text-muted';
         }
-
         return 'glyphicon glyphicon-asterisk text-muted';
-      }
+      },
     },
     components: {
       PilotIconWithMedals,
-      LeaderboardTicker
-    }
-  }
+      LeaderboardTicker,
+    },
+  };
 </script>
 
 <template>
@@ -78,7 +73,15 @@
   </div>
 </template>
 
+
 <style lang="scss">
+  @import 'node_modules/bootstrap/scss/functions'; // Import Bootstrap functions first
+  @import 'node_modules/bootstrap/scss/variables'; // Import Bootstrap variables
+  @import 'node_modules/bootstrap/scss/mixins';    // Import Bootstrap mixins for breakpoints
+
+  // Import your custom variables (adjust the path based on your project)
+  @import '/src/sass/variables';
+
   .place {
     display: grid;
     align-items: center;
@@ -88,21 +91,30 @@
       grid-template-columns: 0.5em 32px auto;
       line-height: 1.2;
     }
+
     &.place-large {
       grid-template-columns: 0.5em 64px auto;
       min-height: 72px;
     }
   }
+
   .place-gold {
     background: $color-first;
   }
+
   .place-silver {
     background: $color-second;
   }
+
   .place-bronze {
     background: $color-third;
   }
+
   .place-wingspan {
     background: $color-wingspan;
+  }
+
+  .place-haxxor {
+    background: lighten($color-first, 30%);
   }
 </style>

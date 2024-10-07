@@ -1,19 +1,17 @@
 <script>
   import { mapActions, mapGetters, mapState } from 'vuex';
-
   import LeaderboardPilot from './leaderboard/leaderboard-pilot.vue';
-
   import iconPlane from '../../files/plane.svg';
   import iconGrave from '../../files/grave.svg';
   import iconSwords from '../../files/swords.svg';
   import { getLeaderboard } from './view-month/registry-leaderboards';
 
   export default {
-    props: ['type', 'title', 'title-description'],
-    data () {
+    props: ['type', 'title', 'titleDescription'],
+    data() {
       return {
         userPlace: null,
-      }
+      };
     },
     computed: {
       ...mapState({
@@ -24,120 +22,79 @@
         'getCategory',
         'hasUser',
       ]),
-      typeArray () {
+      typeArray() {
         return this.type.split('_');
       },
-      isShipCategory () {
+      isShipCategory() {
         const check = new Set(['driver', 'killer']);
         return this.typeArray.length === 3 && check.has(this.typeArray[1]);
       },
-      isWeaponCategory () {
+      isWeaponCategory() {
         return this.typeArray.length === 3 && this.typeArray[1] === 'user';
       },
-      isValueCategory () {
+      isValueCategory() {
         return this.typeArray[this.typeArray.length - 1] === 'value' && this.typeArray[0] !== 'value';
       },
-      isShowingTip () {
+      isShowingTip() {
         return (this.isShipCategory || this.isWeaponCategory) && !this.isValueCategory;
       },
-      icon () {
-        if (this.isWeaponCategory) {
-          return iconSwords;
+      icon() {
+        if (this.isWeaponCategory) return iconSwords;
+        if (this.isShipCategory) {
+          return this.typeArray[1] === 'driver' ? iconPlane : iconGrave;
         }
-
-        if (!this.isShipCategory) {
-          return undefined;
-        }
-
-        switch (this.typeArray[1]) {
-          case 'driver': return iconPlane;
-          case 'killer': return iconGrave;
-          default: return undefined;
-        }
+        return undefined;
       },
-      _title () {
+      _title() {
         if (this.title) {
-          if (!this.titleDescription)
-            return this.title;
-
-          return `<abbr title="${this.titleDescription}">${this.title}</abbr>`;
-        }
-
-        if (this.isValueCategory) {
-          return '';
+          return this.titleDescription
+            ? `<abbr title="${this.titleDescription}">${this.title}</abbr>`
+            : this.title;
         }
 
         const data = getLeaderboard(this.type);
-        if (!data || !data.name) {
-          return this.type;
-        }
-
-        return data.name;
+        return data?.name || this.type;
       },
-      text () {
-        if (!this.titleDescription && this.isValueCategory) {
-          return '';
-        }
-
+      text() {
         const data = getLeaderboard(this.type);
-        if (!data || !data.empty) {
-          return '';
-        }
-
-        return data.empty;
+        return data?.empty || '';
       },
-      places () {
+      places() {
         this.userPlace = null;
-
-        const ret = {1: [], 2: [], 3: []};
+        const ret = { 1: [], 2: [], 3: [] };
         const tmp = this.getCategory(this.type);
 
-        if (!tmp.length) {
-          return ret;
-        }
+        if (!tmp.length) return ret;
 
-        if (this.hasUser) {
-          ret[4] = [];
-        }
+        if (this.hasUser) ret[4] = [];
 
         for (let item of tmp) {
-          if (item.place > 3 && (!this.hasUser || this.userPlace)) {
-            break;
-          }
-
+          if (item.place > 3 && (!this.hasUser || this.userPlace)) break;
           if (this.userId === item.character_id) {
             this.userPlace = item.place;
             ret[4].push(item);
           }
-
-          if (item.place < 4) {
-            ret[item.place].push(item);
-          }
+          if (item.place < 4) ret[item.place].push(item);
         }
-
         return ret;
       },
-      url () {
-        return '/category/' + this.type;
+      url() {
+        return `/category/${this.type}`;
       }
     },
     methods: {
-      checkPlaces (places) {
-        if (places['1'].length) {
-          return true;
-        }
-
-        return false
+      checkPlaces(places) {
+        return places['1'].length > 0;
       },
-      navigate (e) {
+      navigate(e) {
         e.preventDefault();
         this.$router.push({
           name: 'category',
           params: {
-            category: this.type
+            category: this.type,
           }
         });
-      },
+      }
     },
     components: {
       LeaderboardPilot,
@@ -165,10 +122,15 @@
 </template>
 
 <style lang="scss">
+  // Import necessary Bootstrap SCSS files
+  @import 'node_modules/bootstrap/scss/functions';  // Functions should be loaded first
+  @import 'node_modules/bootstrap/scss/variables';  // Variables contain grid breakpoints
+  @import 'node_modules/bootstrap/scss/mixins';     // Mixins should be loaded after variables
+
   .leaderboard-wrap {
     display: grid;
 
-    @include media-breakpoint-up(lg) {
+    @include media-breakpoint-up(md) {
       grid-template: "text first second third" / 1fr 3fr 3fr 3fr;
       grid-column-gap: 0.5em;
 
@@ -177,6 +139,7 @@
       }
     }
   }
+
   .leaderboard-ship-tip {
     display: grid;
     grid-template-columns: min-content min-content;
@@ -184,6 +147,7 @@
     align-items: center;
     line-height: 1;
   }
+
   .leaderboard-icon {
     width: 15px;
 
@@ -191,22 +155,24 @@
       filter: invert(1);
     }
   }
+
   .leaderboard-places {
     display: grid;
     grid-row-gap: 0.5em;
 
     &.tracking {
-      @include media-breakpoint-up(lg) {
+      @include media-breakpoint-up(md) {
         grid-area: tracking;
       }
     }
   }
+
   .leaderboard-message {
     grid-area: 2 / 1;
     display: grid;
     align-items: center;
 
-    @include media-breakpoint-up(lg) {
+    @include media-breakpoint-up(md) {
       grid-area: 1 / 2 / 1 / 10;
     }
   }

@@ -1,17 +1,12 @@
-<script>
-  import LayoutDefault from '../layouts/default.vue'
-  import ViewCategory from '../components/view-category.vue'
+<script setup>
+import LayoutDefault from '../layouts/default.vue';
+import ViewCategory from '../components/view-category.vue';
 
-  export default {
-    components: {
-      LayoutDefault,
-      ViewCategory
-    }
-  }
+const route = useRoute(); // Vue Router composition API
 </script>
 
 <template>
-  <layout-default>
-    <view-category :category="$route.params.category"></view-category>
-  </layout-default>
+  <LayoutDefault>
+    <ViewCategory :category="route.params.category" />
+  </LayoutDefault>
 </template>

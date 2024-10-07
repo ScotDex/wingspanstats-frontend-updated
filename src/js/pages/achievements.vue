@@ -1,17 +1,10 @@
-<script>
-  import LayoutDefault from '../layouts/default.vue'
-  import ViewAchievements from '../components/view-achievements.vue'
-
-  export default {
-    components: {
-      LayoutDefault,
-      ViewAchievements
-    }
-  }
+<script setup>
+import LayoutDefault from '../layouts/default.vue';
+import ViewAchievements from '../components/view-achievements.vue';
 </script>
 
 <template>
-  <layout-default>
-    <view-achievements></view-achievements>
-  </layout-default>
+  <LayoutDefault>
+    <ViewAchievements />
+  </LayoutDefault>
 </template>

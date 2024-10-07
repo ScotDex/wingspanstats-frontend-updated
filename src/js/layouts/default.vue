@@ -1,61 +1,45 @@
-<script>
-  import { mapActions, mapGetters, mapState } from 'vuex';
+<script setup>
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { computed, onMounted } from 'vue';
+import localforage from 'localforage';
+import ViewAllTime from '../components/view-alltime.vue';
 
-  import Glyphicons from './power-threads-glyphicons.vue'
-  import ViewAllTime from '../components/view-alltime.vue'
+const store = useStore();
+const router = useRouter();
 
-  export default {
-    computed: {
-      ...mapState({
-        darkMode: state => state.user.settings.darkMode,
-      }),
-      cssClassesRoot () {
-        return this.darkMode ? 'bg-night text-light' : '';
-      },
-      switchText () {
-        return this.darkMode ? 'Return to light' : 'Join the dark side';
-      },
-    },
-    methods: {
-      ...mapActions([
-        'loadUserId',
-        'loadSettings',
-        'setNight',
-      ]),
-      ...mapGetters([
-        'hasUser',
-      ]),
-      navigate (e) {
-        e.preventDefault();
-        this.$router.push({
-          name: e.target.dataset.name
-        });
-      },
-      reset (e) {
-        e.preventDefault();
-        return localforage.clear()
-          .then(() => {
-              location.reload();
-            }
-          )
-      },
-      track (e) {
-        e.preventDefault();
-        location.href = 'https://login.eveonline.com/oauth/authorize/?response_type=token&client_id=51c4a940a2464ea98df98c8f0dc1bf71&redirect_uri=https://wds-stats.secondfry.ru/track/';
-      },
-      switchSide (e) {
-        e.preventDefault();
-        this.setNight(!this.darkMode);
-      },
-    },
-    created () {
-      this.loadSettings();
-      this.loadUserId();
-    },
-    components: {
-      ViewAllTime
-    }
-  }
+const darkMode = computed(() => store.state.user.settings.darkMode);
+
+const cssClassesRoot = computed(() => (darkMode.value ? 'bg-night text-light' : ''));
+const switchText = computed(() => (darkMode.value ? 'Return to light' : 'Join the dark side'));
+
+const hasUser = computed(() => store.getters.hasUser);
+
+const navigate = (e) => {
+  e.preventDefault();
+  router.push({ name: e.target.dataset.name });
+};
+
+const reset = async (e) => {
+  e.preventDefault();
+  await localforage.clear();
+  location.reload();
+};
+
+const track = (e) => {
+  e.preventDefault();
+  location.href = 'https://login.eveonline.com/oauth/authorize/?response_type=token&client_id=51c4a940a2464ea98df98c8f0dc1bf71&redirect_uri=https://wds-stats.secondfry.ru/track/';
+};
+
+const switchSide = (e) => {
+  e.preventDefault();
+  store.dispatch('setNight', !darkMode.value);
+};
+
+onMounted(() => {
+  store.dispatch('loadSettings');
+  store.dispatch('loadUserId');
+});
 </script>
 
 <template>
@@ -73,24 +57,24 @@
           <li class="nav-item">
             <a class="nav-item nav-link" href="#" @click="reset">Reset</a>
           </li>
-          <li class="nav-item" v-if="!hasUser()">
+          <li class="nav-item" v-if="!hasUser">
             <a class="nav-item nav-link" href="#" @click="track">Track your character</a>
           </li>
         </ul>
       </div>
     </nav>
     <div class="container my-3">
-      <view-all-time></view-all-time>
+      <ViewAllTime />
       <slot></slot>
     </div>
     <div class="sf-footer pt-3 text-center bg-dark text-light">
       <footer class="container">
         <p>
           Yours truly, <a href="https://github.com/secondfry/">SecondFry</a> (<a
-            href="https://zkillboard.com/character/91435934/">Lenai Chelien</a>).<br>
-          Adapted for web by in January, 2016.<br>
-          Rewritten in March, 2016.<br>
-          Rewritten in March, 2018. Consistency!<br>
+            href="https://zkillboard.com/character/91435934/">Lenai Chelien</a>).<br />
+          Adapted for web by in January, 2016.<br />
+          Rewritten in March, 2016.<br />
+          Rewritten in March, 2018. Consistency!<br />
           Also check <a target="_blank" href="https://www.youtube.com/user/SecondFry" rel="noopener">my YouTube channel</a> :P.
         </p>
         <p class="mb-0">Original idea by <a href="https://zkillboard.com/character/92805979/">Valtyr Farshield</a>.</p>
@@ -100,22 +84,25 @@
 </template>
 
 <style lang="scss">
-  .sf-footer {
-    padding-bottom: 80px;
+@import '/src/sass/variables';
+
+.sf-footer {
+  padding-bottom: 80px;
+}
+
+.bg-night {
+  background: $color-night !important;
+
+  a {
+    color: $color-night-a;
   }
-  .bg-night {
-    background: $color-night !important;
 
-    a {
-      color: $color-night-a;
-    }
-
-    .bg-success {
-      background: $color-night-success !important;
-    }
-
-    .table {
-      color: $gray-100 !important;
-    }
+  .bg-success {
+    background: $color-night-success !important;
   }
+
+  .table {
+    color: $gray-100 !important;
+  }
+}
 </style>

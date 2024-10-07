@@ -1,14 +1,14 @@
-import Vuex from 'vuex'
+import { createStore } from 'vuex';
 
-import achievements from './state/achievements'
-import alltime from './state/alltime'
-import category from './state/category'
-import month from './state/month'
-import pilot_medals from './state/pilot_medals'
-import pilot_names from './state/pilot_names'
-import user from './state/user'
+import achievements from './state/achievements';
+import alltime from './state/alltime';
+import category from './state/category';
+import month from './state/month';
+import pilot_medals from './state/pilot_medals';
+import pilot_names from './state/pilot_names';
+import user from './state/user';
 
-const store = new Vuex.Store({
+const store = createStore({
   modules: {
     achievements,
     alltime,
@@ -17,7 +17,8 @@ const store = new Vuex.Store({
     pilot_medals,
     pilot_names,
     user,
-  }
+  },
+  strict: process.env.NODE_ENV !== 'production' // Enable strict mode in development
 });
 
 export default store;

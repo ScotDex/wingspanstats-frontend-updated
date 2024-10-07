@@ -1,5 +1,5 @@
 // Import Bootstrap SCSS for Bootstrap 5 (ensure it's installed via npm)
-@import 'node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap/scss/bootstrap'; // Only import Bootstrap once
 
 // Custom helpers (ensure this file exists)
 @import 'helpers';

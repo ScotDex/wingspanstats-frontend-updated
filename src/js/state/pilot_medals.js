@@ -5,7 +5,7 @@ const events = {
   CACHE_HIT: 'PILOT_MEDALS_CACHE_HIT',
   LOAD_SUCCESS: 'PILOT_MEDALS_LOAD_SUCCESS',
   LOAD_FAIL: 'PILOT_MEDALS_LOAD_FAIL',
-  REQUEST: 'PILOT_MEDALS_REQUEST'
+  REQUEST: 'PILOT_MEDALS_REQUEST',
 };
 
 export default {
@@ -14,54 +14,46 @@ export default {
     isLoaded: false,
   },
   getters: {
-    getPilotMedals: state => id => {
-      try { return state.data[id].medals }
-      catch (e) {}
-    },
+    getPilotMedals: (state) => (id) => state.data[id]?.medals || null,
     getPilotCategoryMedals: (state, getters) => (id, category) => {
-      try { return getters.getPilotMedals(id)[category]; }
-      catch (e) {}
-    }
+      return getters.getPilotMedals(id)?.[category] || null;
+    },
   },
   mutations: {
-    [events.CACHE_HIT] (state, data) {
+    [events.CACHE_HIT](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
-    [events.LOAD_SUCCESS] (state, data) {
+    [events.LOAD_SUCCESS](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
   },
   actions: {
-    loadPilotMedalsFast ({ commit, dispatch }) {
-      localforage.getItem('pilot_medals')
-        .then(data => {
-          if (data) {
-            commit(events.CACHE_HIT, data);
-          }
-        })
-        .then(() => {
-          dispatch('loadPilotMedals');
-        })
-        .catch(console.log.bind(console));
+    async loadPilotMedalsFast({ commit, dispatch }) {
+      try {
+        const data = await localforage.getItem('pilot_medals');
+        if (data) {
+          commit(events.CACHE_HIT, data);
+        }
+        dispatch('loadPilotMedals');
+      } catch (error) {
+        console.log(error);
+      }
     },
-    loadPilotMedals ({ commit }) {
+    async loadPilotMedals({ commit }) {
       commit(events.REQUEST);
-      return axios
-        .get('/api/pilot/medals/')
-        .then(res => {
-          const ret = {};
-          for (let pilot of res.data) {
-            ret[pilot._id] = pilot
-          }
-          return ret
-        })
-        .then(data => {
-          localforage.setItem('pilot_medals', data);
-          commit(events.LOAD_SUCCESS, data);
-        })
-        .catch(console.log.bind(console))
+      try {
+        const response = await axios.get('/api/pilot/medals/');
+        const data = response.data.reduce((acc, pilot) => {
+          acc[pilot._id] = pilot;
+          return acc;
+        }, {});
+        await localforage.setItem('pilot_medals', data);
+        commit(events.LOAD_SUCCESS, data);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
-}
+};

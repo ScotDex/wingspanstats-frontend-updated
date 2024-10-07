@@ -1,6 +1,5 @@
-import VueRouter from 'vue-router'
-
-import SSO from './pages/sso.vue'
+import { createRouter, createWebHistory } from 'vue-router'; // Vue 3 Router
+import SSO from './pages/sso.vue';
 
 const routes = [
   {
@@ -25,9 +24,9 @@ const routes = [
   }
 ];
 
-const router = new VueRouter({
-  mode: 'history',
-  routes
+const router = createRouter({
+  history: createWebHistory(), // Using HTML5 history mode
+  routes,
 });
 
 export default router;

@@ -1,74 +1,72 @@
 <script>
-  import moment from 'moment'
-  import { mapActions, mapGetters, mapState } from 'vuex'
+  import dayjs from 'dayjs';  // Replace moment with dayjs
+  import { mapActions, mapGetters, mapState } from 'vuex';
+  import { EventBus } from '../event-bus';
+  import Leaderboard from './leaderboard.vue';
+  import MonthSummary from './view-month/summary.vue';
+  import NavigationBar from './navigation-bar.vue';
+  import PilotIconWithMedals from './pilot-icon-with-medals.vue';
+  import ShipIcon from './ship-icon.vue';
+  import WeaponIcon from './weapon-icon.vue';
 
-  import { EventBus } from '../event-bus'
-
-  import Leaderboard from './leaderboard.vue'
-  import MonthSummary from './view-month/summary.vue'
-  import NavigationBar from './navigation-bar.vue'
-  import PilotIconWithMedals from './pilot-icon-with-medals.vue'
-  import ShipIcon from './ship-icon.vue'
-  import WeaponIcon from './weapon-icon.vue'
-
-  import leaderboards from './view-month/registry-leaderboards'
+  import leaderboards from './view-month/registry-leaderboards';
   const realLeaderboards = JSON.parse(JSON.stringify(leaderboards));
 
   export default {
     props: ['month', 'year'],
-    data () {
+    data() {
       return {
-        monthData: this.month || moment().month() + 1,
-        yearData: this.year || moment().year(),
-        leaderboards: realLeaderboards
-      }
+        monthData: this.month || dayjs().month() + 1,  // Replaced moment with dayjs
+        yearData: this.year || dayjs().year(),
+        leaderboards: realLeaderboards,
+      };
     },
     computed: {
       ...mapState({
-        arePilotMedalsLoaded: state => state.pilot_medals.isLoaded,
-        arePilotNamesLoaded: state => state.pilot_names.isLoaded,
-        summary: state => state.month.summary,
+        arePilotMedalsLoaded: (state) => state.pilot_medals.isLoaded,
+        arePilotNamesLoaded: (state) => state.pilot_names.isLoaded,
+        summary: (state) => state.month.summary,
       }),
       ...mapGetters([
         'getIsMonthLoaded',
         'getFirstInCategory',
         'getPilotName',
       ]),
-      dedicated () {
-        return this.getFirstInCategory('dedication')
+      dedicated() {
+        return this.getFirstInCategory('dedication');
       },
-      diverse () {
-        return this.getFirstInCategory('diversity')
+      diverse() {
+        return this.getFirstInCategory('diversity');
       },
-      diverseShips () {
+      diverseShips() {
         if (this.diverse) {
           return this.sort(this.diverse.ship_type_ids);
         }
       },
-      diverseWeapons () {
+      diverseWeapons() {
         if (this.diverse) {
           return this.sort(this.diverse.weapon_type_ids);
         }
       },
-      moment () {
+      dayjsInstance() {
         if (this.yearData && this.monthData) {
-          return moment(this.yearData + '-' + this.monthData);
+          return dayjs(`${this.yearData}-${this.monthData}`);
         }
 
-        return moment();
+        return dayjs();
       },
-      date: function () {
+      date() {
         if (this.monthData && this.yearData) {
-          return { year: this.yearData, month: this.monthData }
+          return { year: this.yearData, month: this.monthData };
         }
 
-        return { year: this.moment.year(), month: this.moment.month() + 1 }
+        return { year: this.dayjsInstance.year(), month: this.dayjsInstance.month() + 1 };
       },
-      monthName () {
-        return this.moment.format('MMMM')
+      monthName() {
+        return this.dayjsInstance.format('MMMM');
       },
       yearShort() {
-        return this.moment.format('YY')
+        return this.dayjsInstance.format('YY');
       },
     },
     methods: {
@@ -77,17 +75,15 @@
         'loadPilotMedalsFast',
         'loadPilotNamesFast',
       ]),
-      setMonth (year, month) {
+      setMonth(year, month) {
         this.monthData = Number(month);
         this.yearData = Number(year);
       },
-      sort (arr) {
-        return arr.sort(function(a, b) {
-          return +/\d+/.exec(a)[0] - +/\d+/.exec(b)[0];
-        });
-      }
+      sort(arr) {
+        return arr.sort((a, b) => +/\d+/.exec(a)[0] - +/\d+/.exec(b)[0]);
+      },
     },
-    created () {
+    created() {
       if (!this.getIsMonthLoaded(this.date)) {
         this.loadMonth(this.date);
       }
@@ -105,7 +101,7 @@
         this.loadMonth(this.date);
       });
     },
-    destroyed () {
+    destroyed() {
       EventBus.$off('month');
     },
     components: {
@@ -114,9 +110,9 @@
       NavigationBar,
       PilotIconWithMedals,
       ShipIcon,
-      WeaponIcon
+      WeaponIcon,
     },
-  }
+  };
 </script>
 
 <template>
@@ -147,12 +143,16 @@
     </div>
     <navigation-bar></navigation-bar>
     <div class="month-leaderboards">
-      <leaderboard v-for="data, category in leaderboards" :key="category" :type="category"></leaderboard>
+      <leaderboard v-for="(data, category) in leaderboards" :key="category" :type="category"></leaderboard>
     </div>
   </div>
 </template>
 
 <style lang="scss">
+  @import 'node_modules/bootstrap/scss/functions';  // Import Bootstrap functions
+  @import 'node_modules/bootstrap/scss/variables';  // Import variables
+  @import 'node_modules/bootstrap/scss/mixins';     // Import mixins for media queries
+
   .month-leaderboards {
     display: grid;
     grid-row-gap: 0.5em;
@@ -160,9 +160,6 @@
     @include media-breakpoint-up(md) {
       grid-template-columns: 1fr 1fr;
     }
-
-    @include media-breakpoint-up(lg) {
-      grid-template-columns: 1fr;
-    }
   }
 </style>
+

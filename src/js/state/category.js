@@ -1,6 +1,5 @@
 import axios from 'axios';
 import localforage from 'localforage';
-
 import default_state from '../components/view-month/registry-leaderboards';
 
 const real_default_state = JSON.parse(JSON.stringify(default_state));
@@ -9,54 +8,51 @@ const events = {
   CACHE_HIT: 'CATEGORY_CACHE_HIT',
   LOAD_SUCCESS: 'CATEGORY_LOAD_SUCCESS',
   LOAD_FAIL: 'CATEGORY_LOAD_FAIL',
-  REQUEST: 'CATEGORY_REQUEST'
+  REQUEST: 'CATEGORY_REQUEST',
 };
 
 export default {
   state: {
-    ...real_default_state
+    ...real_default_state,
   },
   mutations: {
-    [events.CACHE_HIT] (state, { category, data }) {
+    [events.CACHE_HIT](state, { category, data }) {
       state[category].data = data;
     },
-    [events.LOAD_SUCCESS] (state, { category, data }) {
+    [events.LOAD_SUCCESS](state, { category, data }) {
       state[category].data = data;
     },
   },
   actions: {
-    loadCategoryCache ({ commit, dispatch }, { category }) {
-      return localforage.getItem([ category, 'alltime' ].join('-'))
-        .then(data => {
-          if (data) {
-            commit(events.CACHE_HIT, { category, data });
-            return true;
-          } else {
-            dispatch('loadCategory', { category });
-            return false;
-          }
-        })
-        .catch(console.log.bind(console));
+    async loadCategoryCache({ commit, dispatch }, { category }) {
+      try {
+        const data = await localforage.getItem(`${category}-alltime`);
+        if (data) {
+          commit(events.CACHE_HIT, { category, data });
+          return true;
+        } else {
+          await dispatch('loadCategory', { category });
+          return false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
-    loadCategoryFast ({ commit, dispatch }, { category }) {
-      return dispatch('loadCategoryCache', { category })
-        .then(status => {
-          if (status) {
-            return dispatch('loadCategory', { category });
-          }
-        })
-        .catch(console.log.bind(console));
+    async loadCategoryFast({ commit, dispatch }, { category }) {
+      const status = await dispatch('loadCategoryCache', { category });
+      if (!status) {
+        await dispatch('loadCategory', { category });
+      }
     },
-    loadCategory ({ commit }, { category }) {
+    async loadCategory({ commit }, { category }) {
       commit(events.REQUEST);
-      return axios
-        .get('/api/category/' + category + '/')
-        .then(res => res.data)
-        .then(data => {
-          localforage.setItem([ category, 'alltime' ].join('-'), data);
-          commit(events.LOAD_SUCCESS, { category, data });
-        })
-        .catch(console.log.bind(console))
+      try {
+        const { data } = await axios.get(`/api/category/${category}/`);
+        await localforage.setItem(`${category}-alltime`, data);
+        commit(events.LOAD_SUCCESS, { category, data });
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
-}
+};

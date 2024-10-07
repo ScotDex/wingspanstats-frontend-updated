@@ -5,7 +5,7 @@ const events = {
   CACHE_HIT: 'PILOT_NAMES_CACHE_HIT',
   LOAD_SUCCESS: 'PILOT_NAMES_LOAD_SUCCESS',
   LOAD_FAIL: 'PILOT_NAMES_LOAD_FAIL',
-  REQUEST: 'PILOT_NAMES_REQUEST'
+  REQUEST: 'PILOT_NAMES_REQUEST',
 };
 
 export default {
@@ -14,50 +14,43 @@ export default {
     isLoaded: false,
   },
   getters: {
-    getPilotName: state => id => {
-      try { return state.data[id].name }
-      catch (e) {}
-    }
+    getPilotName: (state) => (id) => state.data[id]?.name || null,
   },
   mutations: {
-    [events.CACHE_HIT] (state, data) {
+    [events.CACHE_HIT](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
-    [events.LOAD_SUCCESS] (state, data) {
+    [events.LOAD_SUCCESS](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
   },
   actions: {
-    loadPilotNamesFast ({ commit, dispatch }) {
-      localforage.getItem('pilot_names')
-        .then(data => {
-          if (data) {
-            commit(events.CACHE_HIT, data);
-          }
-        })
-        .then(() => {
-          dispatch('loadPilotNames');
-        })
-        .catch(console.log.bind(console));
+    async loadPilotNamesFast({ commit, dispatch }) {
+      try {
+        const data = await localforage.getItem('pilot_names');
+        if (data) {
+          commit(events.CACHE_HIT, data);
+        }
+        dispatch('loadPilotNames');
+      } catch (error) {
+        console.log(error);
+      }
     },
-    loadPilotNames ({ commit }) {
+    async loadPilotNames({ commit }) {
       commit(events.REQUEST);
-      return axios
-        .get('/api/pilot/names/')
-        .then(res => {
-          const ret = {};
-          for (let pilot of res.data) {
-            ret[pilot._id] = pilot
-          }
-          return ret
-        })
-        .then(data => {
-          localforage.setItem('pilot_names', data);
-          commit(events.LOAD_SUCCESS, data);
-        })
-        .catch(console.log.bind(console))
-    }
-  }
-}
+      try {
+        const response = await axios.get('/api/pilot/names/');
+        const data = response.data.reduce((acc, pilot) => {
+          acc[pilot._id] = pilot;
+          return acc;
+        }, {});
+        await localforage.setItem('pilot_names', data);
+        commit(events.LOAD_SUCCESS, data);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  },
+};

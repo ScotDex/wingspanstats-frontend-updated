@@ -20,61 +20,57 @@ export default {
     }
   },
   getters: {
-    hasUser: state => !!state.user.id
+    hasUser: (state) => !!state.user.id,
   },
   mutations: {
-    [events.TRACK_CACHE_HIT] (state, id) {
+    [events.TRACK_CACHE_HIT](state, id) {
       state.user.id = id;
     },
-    [events.TRACK] (state, id) {
+    [events.TRACK](state, id) {
       state.user.id = id;
     },
-    [events.RIVAL_ADD] (state, id) {
+    [events.RIVAL_ADD](state, id) {
       state.rivals.push({ id });
     },
-    [events.RIVALS_RESET] (state) {
+    [events.RIVALS_RESET](state) {
       state.rivals = [];
     },
-    [events.SETTINGS_SET_NIGHT] (state, isDark) {
+    [events.SETTINGS_SET_NIGHT](state, isDark) {
       state.settings.darkMode = isDark;
     },
-    [events.SETTINGS_CACHE_HIT] (state, data) {
+    [events.SETTINGS_CACHE_HIT](state, data) {
       state.settings.darkMode = data.isDark;
     },
   },
   actions: {
-    async loadUserId ({ commit }) {
+    async loadUserId({ commit }) {
       const data = await localforage.getItem('user');
-      if (!data) {
-        return;
+      if (data) {
+        commit(events.TRACK_CACHE_HIT, data.id);
       }
-
-      commit(events.TRACK_CACHE_HIT, data.id);
     },
-    async trackUserId ({ commit }, id) {
+    async trackUserId({ commit }, id) {
       await localforage.setItem('user', { id });
-      return commit(events.TRACK, id);
+      commit(events.TRACK, id);
     },
-    addRival ({ commit }, id) {
-      return commit(events.RIVAL_ADD, id);
+    addRival({ commit }, id) {
+      commit(events.RIVAL_ADD, id);
     },
-    resetRivals ({ commit }) {
-      return commit(events.RIVALS_RESET);
+    resetRivals({ commit }) {
+      commit(events.RIVALS_RESET);
     },
-    async loadSettings ({ commit }) {
+    async loadSettings({ commit }) {
       const data = await localforage.getItem('settings');
-      if (!data) {
-        return;
+      if (data) {
+        commit(events.SETTINGS_CACHE_HIT, data);
       }
-
-      commit(events.SETTINGS_CACHE_HIT, data);
     },
-    async setNight ({ commit }, isDark) {
+    async setNight({ commit }, isDark) {
       localStorage.isDark = isDark;
       document.body.style.background = '';
 
       await localforage.setItem('settings', { isDark });
-      return commit(events.SETTINGS_SET_NIGHT, isDark);
+      commit(events.SETTINGS_SET_NIGHT, isDark);
     }
   }
-}
+};

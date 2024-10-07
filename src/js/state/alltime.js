@@ -5,7 +5,7 @@ const alltime = {
   CACHE_HIT: 'ALLTIME_CACHE_HIT',
   LOAD_SUCCESS: 'ALLTIME_LOAD_SUCCESS',
   LOAD_FAIL: 'ALLTIME_LOAD_FAIL',
-  REQUEST: 'ALLTIME_REQUEST'
+  REQUEST: 'ALLTIME_REQUEST',
 };
 
 export default {
@@ -13,42 +13,41 @@ export default {
     data: {
       value: undefined,
       count: undefined,
-      damage: undefined
+      damage: undefined,
     },
     isLoaded: false,
   },
   mutations: {
-    [alltime.CACHE_HIT] (state, data) {
+    [alltime.CACHE_HIT](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
-    [alltime.LOAD_SUCCESS] (state, data) {
+    [alltime.LOAD_SUCCESS](state, data) {
       state.data = data;
       state.isLoaded = true;
     },
   },
   actions: {
-    loadAlltimeFast ({ commit, dispatch }) {
-      localforage.getItem('alltime')
-        .then(data => {
-          if (data) {
-            commit(alltime.CACHE_HIT, data);
-          }
-        })
-        .then(() => {
-          dispatch('loadAlltime');
-        })
-        .catch(console.log.bind(console));
+    async loadAlltimeFast({ commit, dispatch }) {
+      try {
+        const data = await localforage.getItem('alltime');
+        if (data) {
+          commit(alltime.CACHE_HIT, data);
+        }
+        dispatch('loadAlltime');
+      } catch (error) {
+        console.log(error);
+      }
     },
-    loadAlltime ({ commit }) {
+    async loadAlltime({ commit }) {
       commit(alltime.REQUEST);
-      return axios
-        .get('/api/summary/')
-        .then(res => {
-          localforage.setItem('alltime', res.data);
-          commit(alltime.LOAD_SUCCESS, res.data);
-        })
-        .catch(console.log.bind(console))
+      try {
+        const { data } = await axios.get('/api/summary/');
+        await localforage.setItem('alltime', data);
+        commit(alltime.LOAD_SUCCESS, data);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
-}
+};
